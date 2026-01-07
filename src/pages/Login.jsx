@@ -30,7 +30,7 @@ const Login = () => {
             navigate('/');
         } catch (err) {
             console.error(err);
-            setError('Invalid credentials. Please check your username/password.');
+            alert(`Connection Error: ${err.message}\nHint: Check your internet or ad-blockers.`);
         }
     };
 
@@ -83,29 +83,6 @@ const Login = () => {
                         <Button type="submit" variant="primary" style={{ width: '100%' }}>
                             Sign In
                         </Button>
-                        <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    if (window.confirm("Initialize System? This will create the 'admin' user.")) {
-                                        try {
-                                            await authService.addUser({
-                                                username: 'admin',
-                                                password: 'password',
-                                                name: 'System Admin',
-                                                role: 'admin'
-                                            });
-                                            alert("Admin user created! You can now login.");
-                                        } catch (e) {
-                                            alert("Error: " + e.message);
-                                        }
-                                    }
-                                }}
-                                style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '0.8rem', textDecoration: 'underline' }}
-                            >
-                                First time? Setup Admin
-                            </button>
-                        </div>
                     </div>
                 </form>
 
