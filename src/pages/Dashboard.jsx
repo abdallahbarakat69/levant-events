@@ -23,14 +23,17 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const clients = dataService.getClients();
-        const salesmen = dataService.getSalesmen();
-        setStats({
-            clients: clients.length,
-            salesmen: salesmen.length,
-            recentClients: clients.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 5)
-        });
-        setLoading(false);
+        const fetchData = async () => {
+            const clients = await dataService.getClients();
+            const salesmen = await dataService.getSalesmen();
+            setStats({
+                clients: clients.length,
+                salesmen: salesmen.length,
+                recentClients: clients.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 5)
+            });
+            setLoading(false);
+        };
+        fetchData();
     }, []);
 
     if (loading) return <div>Loading...</div>;

@@ -5,7 +5,24 @@ import { authService } from '../services/authService';
 import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
-    const navigate = useNavigate();
+    const [userRole, setUserRole] = React.useState(null);
+
+    React.useEffect(() => {
+        const fetchUser = async () => {
+            const user = await authService.getCurrentUser();
+            // In Supabase, user metadata is in user.user_metadata or we fetch profile
+            // For now, let's assume authService returns the object we expect or we re-fetch
+            if (user) {
+                // Determine role. If we need to fetch profile from DB:
+                // const profile = ...
+                // But authService.getCurrentUser might just return Auth User object.
+                // Let's check authService again separately.
+                // For safety:
+                setUserRole(user.user_metadata?.role || 'staff');
+            }
+        };
+        fetchUser();
+    }, []);
 
     const handleLogout = () => {
         authService.logout();
@@ -34,7 +51,7 @@ const Sidebar = () => {
                     <span>Sales Team</span>
                 </NavLink>
 
-                {authService.getCurrentUser()?.role === 'admin' && (
+                {userRole === 'admin' && (
                     <NavLink to="/users" className={({ isActive }) => isActive ? `${styles.link} ${styles.active}` : styles.link}>
                         <Shield size={24} weight="duotone" />
                         <span>Users</span>
