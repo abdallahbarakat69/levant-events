@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from './pages/Login';
 import MainLayout from './layouts/MainLayout';
 import { authService } from './services/authService';
@@ -10,7 +10,20 @@ import SalesTeam from './pages/SalesTeam';
 import Users from './pages/Users';
 
 const ProtectedRoute = () => {
-  const isAuthenticated = authService.isAuthenticated();
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      const auth = await authService.isAuthenticated();
+      setIsAuthenticated(auth);
+    };
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#666' }}>Loading...</div>;
+  }
+
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 

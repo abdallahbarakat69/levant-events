@@ -17,8 +17,9 @@ const Users = () => {
         loadUsers();
     }, []);
 
-    const loadUsers = () => {
-        setUsers(authService.getUsers());
+    const loadUsers = async () => {
+        const data = await authService.getUsers();
+        setUsers(data);
     };
 
     const handleInputChange = (e) => {
@@ -26,24 +27,25 @@ const Users = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         try {
-            authService.addUser(formData);
+            await authService.addUser(formData);
             loadUsers();
             setIsModalOpen(false);
             setFormData({ name: '', username: '', password: '', role: 'staff' });
             setShowPassword(false);
+            alert("User created! (Note: You are now logged in as the new user)");
         } catch (err) {
             setError(err.message);
         }
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                authService.deleteUser(id);
+                await authService.deleteUser(id);
                 loadUsers();
             } catch (err) {
                 alert(err.message);

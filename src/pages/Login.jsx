@@ -18,13 +18,19 @@ const Login = () => {
         setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            authService.login(formData.username, formData.password);
+            // Convert simple username to fake email for Supabase
+            const email = formData.username.includes('@')
+                ? formData.username
+                : `${formData.username}@levantevents.com`;
+
+            await authService.login(email, formData.password);
             navigate('/');
         } catch (err) {
-            setError('Invalid username or password. Try admin/password or staff/password.');
+            console.error(err);
+            setError('Invalid credentials. Please check your username/password.');
         }
     };
 

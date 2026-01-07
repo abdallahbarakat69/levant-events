@@ -43,10 +43,16 @@ const Clients = () => {
     const [formData, setFormData] = useState(initialFormState);
 
     useEffect(() => {
-        const loadedClients = dataService.getClients();
-        setClients(loadedClients);
-        setFilteredClients(loadedClients);
-        setSalesmen(dataService.getSalesmen());
+        const loadData = async () => {
+            const [loadedClients, loadedSalesmen] = await Promise.all([
+                dataService.getClients(),
+                dataService.getSalesmen()
+            ]);
+            setClients(loadedClients);
+            setFilteredClients(loadedClients);
+            setSalesmen(loadedSalesmen);
+        };
+        loadData();
     }, []);
 
     useEffect(() => {
@@ -88,22 +94,32 @@ const Clients = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (editingClient) {
-            const updated = dataService.updateClient(editingClient.id, formData);
-            setClients(clients.map(c => c.id === updated.id ? updated : c));
-        } else {
-            const newClient = dataService.addClient(formData);
-            setClients([...clients, newClient]);
+        try {
+            if (editingClient) {
+                const updated = await dataService.updateClient(editingClient.id, formData);
+                setClients(clients.map(c => c.id === updated.id ? updated : c));
+            } else {
+                const newClient = await dataService.addClient(formData);
+                setClients([...clients, newClient]);
+            }
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Failed to save client", error);
+            alert("Failed to save client. Please check your connection.");
         }
-        setIsModalOpen(false);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this client?')) {
-            dataService.deleteClient(id);
-            setClients(prev => prev.filter(c => c.id !== id));
+            try {
+                await dataService.deleteClient(id);
+                setClients(prev => prev.filter(c => c.id !== id));
+            } catch (error) {
+                console.error("Failed to delete client", error);
+                alert("Failed to delete client.");
+            }
         }
     };
 

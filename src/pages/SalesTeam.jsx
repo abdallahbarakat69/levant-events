@@ -12,7 +12,11 @@ const SalesTeam = () => {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
 
     useEffect(() => {
-        setSalesmen(dataService.getSalesmen());
+        const loadSalesmen = async () => {
+            const data = await dataService.getSalesmen();
+            setSalesmen(data);
+        };
+        loadSalesmen();
     }, []);
 
     const handleInputChange = (e) => {
@@ -20,18 +24,28 @@ const SalesTeam = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const newSalesman = dataService.addSalesman(formData);
-        setSalesmen(prev => [...prev, newSalesman]);
-        setFormData({ name: '', email: '', phone: '' });
-        setIsModalOpen(false);
+        try {
+            const newSalesman = await dataService.addSalesman(formData);
+            setSalesmen(prev => [...prev, newSalesman]);
+            setFormData({ name: '', email: '', phone: '' });
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Error adding salesman", error);
+            alert("Failed to add salesman.");
+        }
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to remove this salesman?')) {
-            dataService.deleteSalesman(id);
-            setSalesmen(prev => prev.filter(s => s.id !== id));
+            try {
+                await dataService.deleteSalesman(id);
+                setSalesmen(prev => prev.filter(s => s.id !== id));
+            } catch (error) {
+                console.error("Error deleting salesman", error);
+                alert("Failed to delete salesman.");
+            }
         }
     };
 
