@@ -1,0 +1,18 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main {
+    flex: 1;
+    margin-left: 260px;
+    /* Match sidebar width */
+    background-color: var(--color-background);
+    min-height: 100vh;
+}
+
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+}

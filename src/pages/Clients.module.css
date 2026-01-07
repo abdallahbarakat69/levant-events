@@ -1,0 +1,215 @@
+.container {
+    padding: 2rem;
+    color: var(--text-primary);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--primary-gold);
+    margin-bottom: 0.5rem;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.searchBox {
+    flex: 1;
+    position: relative;
+    max-width: 400px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.searchInput {
+    width: 90%;
+    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+.select {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-width: 200px;
+}
+
+.tableCard {
+    background-color: var(--surface-light);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 1rem;
+    background-color: rgba(207, 181, 59, 0.1);
+    color: var(--primary-gold);
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.clientName {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.clientNotes {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.salesmanTag {
+    background-color: rgba(207, 181, 59, 0.15);
+    color: var(--primary-gold);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.socials {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.socialLink {
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.socialLink:hover {
+    color: var(--primary-gold);
+}
+
+.empty {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 3rem;
+}
+
+/* Action Buttons */
+.actionButtons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.4rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deleteBtn:hover {
+    background-color: rgba(255, 77, 79, 0.1);
+    color: var(--danger-color, #ff4d4f);
+}
+
+/* Modal Form */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.selectInput {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+.textarea {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+}
+
+.divider {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+    font-family: 'Playfair Display', serif;
+    color: var(--primary-gold);
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
