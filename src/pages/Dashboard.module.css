@@ -135,3 +135,28 @@
     color: var(--color-text-muted);
     padding: 40px;
 }
+
+/* Responsive Table Wrapper */
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* smooth scrolling on iOS */
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+}

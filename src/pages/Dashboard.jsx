@@ -77,31 +77,33 @@ const Dashboard = () => {
                     <h2>Recently Updated Clients</h2>
                 </div>
                 <div className={styles.tableCard}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Notes</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {stats.recentClients.map(client => (
-                                <tr key={client.id}>
-                                    <td><strong>{client.fullName}</strong></td>
-                                    <td>{client.phone}</td>
-                                    <td className={styles.truncate}>{client.notes}</td>
-                                    <td><span className={styles.badge}>Active</span></td>
-                                </tr>
-                            ))}
-                            {stats.recentClients.length === 0 && (
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
+                            <thead>
                                 <tr>
-                                    <td colSpan="4" className={styles.empty}>No clients found.</td>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Notes</th>
+                                    <th>Status</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {stats.recentClients.map(client => (
+                                    <tr key={client.id}>
+                                        <td><strong>{client.fullName}</strong></td>
+                                        <td>{client.phone}</td>
+                                        <td className={styles.truncate}>{client.notes}</td>
+                                        <td><span className={styles.badge}>Active</span></td>
+                                    </tr>
+                                ))}
+                                {stats.recentClients.length === 0 && (
+                                    <tr>
+                                        <td colSpan="4" className={styles.empty}>No clients found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
