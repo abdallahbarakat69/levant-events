@@ -11,27 +11,7 @@
 </head>
 
 <body>
-  <div id="debug-overlay"
-    style="position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; pointer-events: none; color: red; font-weight: bold; padding: 10px; background: rgba(255,255,255,0.8);">
-  </div>
-  <script>
-    window.onerror = function (msg, url, lineNo, columnNo, error) {
-      var overlay = document.getElementById('debug-overlay');
-      overlay.innerHTML += '<div>Error: ' + msg + ' at ' + url + ':' + lineNo + '</div>';
-      return false;
-    };
-    window.onunhandledrejection = function (event) {
-      var overlay = document.getElementById('debug-overlay');
-      overlay.innerHTML += '<div>Promise Error: ' + event.reason + '</div>';
-    };
-  </script>
-  <div id="root">
-    <div style="padding: 20px; font-family: sans-serif;">
-      Loading Levant Events... <br>
-      If this text disappears but screen stays white, React mounted but crashed. <br>
-      Wait for error details above.
-    </div>
-  </div>
+  <div id="root"></div>
 </body>
 
 </html>
