@@ -107,11 +107,14 @@
 .table td {
     white-space: normal;
     word-break: break-word;
-    max-width: 250px;
-    /* Limit max width of any single cell */
+    min-width: 120px;
+    /* Ensure columns don't collapse too much */
+    padding: 1rem;
 }
 
 /* Actions column shouldn't wrap weirdly but needs space */
+/* Actions column shouldn't wrap weirdly but needs space */
+.table th:last-child,
 .table td:last-child {
     white-space: nowrap;
     width: 1%;
