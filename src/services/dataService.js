@@ -36,7 +36,7 @@ export const dataService = {
             const { data, error } = await supabase
                 .from('clients')
                 .select('*')
-                .order('created_at', { ascending: false })
+                .order('updated_at', { ascending: false })
                 .range(from, from + step - 1);
 
             if (error) {
