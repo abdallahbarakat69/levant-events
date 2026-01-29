@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
 import SalesTeam from './pages/SalesTeam';
 import Users from './pages/Users';
+import AuditLog from './pages/AuditLog';
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -61,6 +62,7 @@ function App() {
             <Route path="/clients" element={<Clients />} />
             <Route path="/sales-team" element={<SalesTeam />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/audit-log" element={<AuditLog />} />
           </Route>
         </Route>
 
