@@ -89,12 +89,13 @@ const Clients = () => {
                 // If the search term has digits, try to match against clean phone number
                 let phoneMatch = false;
                 if (c.phone) {
+                    const phoneStr = String(c.phone);
                     // Check raw match (e.g. if user types dashes intentionally)
-                    if (c.phone.toLowerCase().includes(term)) phoneMatch = true;
+                    if (phoneStr.toLowerCase().includes(term)) phoneMatch = true;
 
                     // Check clean match (e.g. user types "050123" but phone is "050-123")
                     if (!phoneMatch && cleanSearchTerm.length > 0) {
-                        const cleanPhone = c.phone.replace(/\D/g, '');
+                        const cleanPhone = phoneStr.replace(/\D/g, '');
                         if (cleanPhone.includes(cleanSearchTerm)) phoneMatch = true;
                     }
                 }
