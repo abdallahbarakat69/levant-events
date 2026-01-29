@@ -1,5 +1,6 @@
 import { Plus, MagnifyingGlass, Globe, FacebookLogo, InstagramLogo, LinkedinLogo, Trash, Envelope } from 'phosphor-react';
 import React, { useState, useEffect } from 'react';
+import Fuse from 'fuse.js';
 import { dataService } from '../services/dataService';
 import Button from '../components/Button';
 import Input from '../components/Input';
@@ -77,32 +78,19 @@ const Clients = () => {
                 result = result.filter(c => c.salesmanId === filter.salesmanId);
             }
         }
+
         if (filter.search) {
-            const term = filter.search.toLowerCase();
-            // Create a "clean" numeric version of the search term for phone matching
-            // This removes everything except digits
-            const cleanSearchTerm = term.replace(/\D/g, '');
-
-            result = result.filter(c => {
-                const nameMatch = c.fullName.toLowerCase().includes(term);
-
-                // If the search term has digits, try to match against clean phone number
-                let phoneMatch = false;
-                if (c.phone) {
-                    const phoneStr = String(c.phone);
-                    // Check raw match (e.g. if user types dashes intentionally)
-                    if (phoneStr.toLowerCase().includes(term)) phoneMatch = true;
-
-                    // Check clean match (e.g. user types "050123" but phone is "050-123")
-                    if (!phoneMatch && cleanSearchTerm.length > 0) {
-                        const cleanPhone = phoneStr.replace(/\D/g, '');
-                        if (cleanPhone.includes(cleanSearchTerm)) phoneMatch = true;
-                    }
-                }
-
-                return nameMatch || phoneMatch;
+            const fuse = new Fuse(result, {
+                keys: ['fullName', 'phone'],
+                threshold: 0.3, // Lower threshold = stricter match, Higher = fuzzier. 0.3 is a good balance.
+                ignoreLocation: true, // Search anywhere in the string
+                includeScore: true
             });
+
+            const fuseResults = fuse.search(filter.search);
+            result = fuseResults.map(r => r.item);
         }
+
         setFilteredClients(result);
         setCurrentPage(1);
     }, [filter, clients]);
