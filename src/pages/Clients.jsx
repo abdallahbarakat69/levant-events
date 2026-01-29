@@ -22,14 +22,21 @@ const SocialIcon = ({ type, url }) => {
     );
 };
 
+import { auditService } from '../services/auditService';
+import { authService } from '../services/authService';
+
 const Clients = () => {
     const [clients, setClients] = useState([]);
     const [salesmen, setSalesmen] = useState([]);
     const [filteredClients, setFilteredClients] = useState([]);
     const [filter, setFilter] = useState({ search: '', salesmanId: 'all' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
+    const [userRole, setUserRole] = useState('staff');
+    const [currentUserEmail, setCurrentUserEmail] = useState('');
 
     const initialFormState = {
         fullName: '',
@@ -51,6 +58,12 @@ const Clients = () => {
             setClients(loadedClients);
             setFilteredClients(loadedClients);
             setSalesmen(loadedSalesmen);
+
+            // Fetch generic role and user info
+            const role = await authService.getCurrentUserRole();
+            setUserRole(role);
+            const user = await authService.getCurrentUser();
+            setCurrentUserEmail(user?.email || 'Unknown');
         };
         loadData();
     }, []);
@@ -58,22 +71,53 @@ const Clients = () => {
     useEffect(() => {
         let result = clients;
         if (filter.salesmanId !== 'all') {
-            result = result.filter(c => c.salesmanId === filter.salesmanId);
+            if (filter.salesmanId === 'unassigned') {
+                result = result.filter(c => !c.salesmanId);
+            } else {
+                result = result.filter(c => c.salesmanId === filter.salesmanId);
+            }
         }
         if (filter.search) {
             const term = filter.search.toLowerCase();
-            result = result.filter(c =>
-                c.fullName.toLowerCase().includes(term) ||
-                c.phone.includes(term)
-            );
+            // Create a "clean" numeric version of the search term for phone matching
+            // This removes everything except digits
+            const cleanSearchTerm = term.replace(/\D/g, '');
+
+            result = result.filter(c => {
+                const nameMatch = c.fullName.toLowerCase().includes(term);
+
+                // If the search term has digits, try to match against clean phone number
+                let phoneMatch = false;
+                if (c.phone) {
+                    // Check raw match (e.g. if user types dashes intentionally)
+                    if (c.phone.toLowerCase().includes(term)) phoneMatch = true;
+
+                    // Check clean match (e.g. user types "050123" but phone is "050-123")
+                    if (!phoneMatch && cleanSearchTerm.length > 0) {
+                        const cleanPhone = c.phone.replace(/\D/g, '');
+                        if (cleanPhone.includes(cleanSearchTerm)) phoneMatch = true;
+                    }
+                }
+
+                return nameMatch || phoneMatch;
+            });
         }
         setFilteredClients(result);
+        setCurrentPage(1);
     }, [filter, clients]);
 
     const handleOpenModal = (client = null) => {
         if (client) {
             setEditingClient(client);
-            setFormData(client);
+            setFormData({
+                ...client,
+                socialMedia: client.socialMedia || { instagram: '', facebook: '', linkedin: '' },
+                notes: client.notes || '',
+                phone: client.phone || '',
+                email: client.email || '',
+                website: client.website || '',
+                salesmanId: client.salesmanId || ''
+            });
         } else {
             setEditingClient(null);
             setFormData({ ...initialFormState, salesmanId: salesmen[0]?.id || '' });
@@ -98,11 +142,17 @@ const Clients = () => {
         e.preventDefault();
         try {
             if (editingClient) {
+                if (userRole !== 'admin') {
+                    alert("Permission Denied: Only Admins can edit clients.");
+                    return;
+                }
                 const updated = await dataService.updateClient(editingClient.id, formData);
                 setClients(clients.map(c => c.id === updated.id ? updated : c));
+                await auditService.logChange('UPDATE', `Updated client: ${updated.fullName}`, currentUserEmail);
             } else {
                 const newClient = await dataService.addClient(formData);
                 setClients([...clients, newClient]);
+                await auditService.logChange('CREATE', `Added new client: ${newClient.fullName}`, currentUserEmail);
             }
             setIsModalOpen(false);
         } catch (error) {
@@ -112,10 +162,16 @@ const Clients = () => {
     };
 
     const handleDelete = async (id) => {
+        if (userRole !== 'admin') {
+            alert("Permission Denied: Only Admins can delete clients.");
+            return;
+        }
         if (window.confirm('Are you sure you want to delete this client?')) {
             try {
+                const clientToDelete = clients.find(c => c.id === id);
                 await dataService.deleteClient(id);
                 setClients(prev => prev.filter(c => c.id !== id));
+                await auditService.logChange('DELETE', `Deleted client: ${clientToDelete?.fullName}`, currentUserEmail);
             } catch (error) {
                 console.error("Failed to delete client", error);
                 alert("Failed to delete client.");
@@ -124,16 +180,22 @@ const Clients = () => {
     };
 
     const getSalesmanName = (id) => {
-        const s = salesmen.find(sm => sm.id === id);
+        const s = salesmen.find(sm => String(sm.id) === String(id));
         return s ? s.name : 'Unassigned';
     };
+
+    // Calculate Pagination
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentClients = filteredClients.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <div>
                     <h1>Clients</h1>
-                    <p>Manage potential and existing clients.</p>
+                    <p>Manage potential and existing clients. ({filteredClients.length} total)</p>
                 </div>
                 <Button onClick={() => handleOpenModal()}>
                     <Plus size={20} weight="bold" />
@@ -159,6 +221,7 @@ const Clients = () => {
                     onChange={e => setFilter(prev => ({ ...prev, salesmanId: e.target.value }))}
                 >
                     <option value="all">All Salesmen</option>
+                    <option value="unassigned">Unassigned</option>
                     {salesmen.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
             </div>
@@ -175,7 +238,7 @@ const Clients = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredClients.map(client => (
+                        {currentClients.map(client => (
                             <tr key={client.id} className={styles.row}>
                                 <td>
                                     <div className={styles.clientName}>{client.fullName}</div>
@@ -200,26 +263,53 @@ const Clients = () => {
                                 </td>
                                 <td>
                                     <div className={styles.actionButtons}>
-                                        <Button variant="outline" size="small" onClick={() => handleOpenModal(client)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                                            Edit
-                                        </Button>
-                                        <button
-                                            className={styles.deleteBtn}
-                                            onClick={() => handleDelete(client.id)}
-                                            title="Delete Client"
-                                        >
-                                            <Trash size={18} />
-                                        </button>
+                                        {userRole === 'admin' && (
+                                            <>
+                                                <Button variant="outline" size="small" onClick={() => handleOpenModal(client)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+                                                    Edit
+                                                </Button>
+                                                <button
+                                                    className={styles.deleteBtn}
+                                                    onClick={() => handleDelete(client.id)}
+                                                    title="Delete Client"
+                                                >
+                                                    <Trash size={18} />
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
                         ))}
-                        {filteredClients.length === 0 && (
+                        {currentClients.length === 0 && (
                             <tr><td colSpan="5" className={styles.empty}>No clients found matching filters.</td></tr>
                         )}
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className={styles.pagination}>
+                    <button
+                        className={styles.pageBtn}
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </button>
+                    <span className={styles.pageInfo}>
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        className={styles.pageBtn}
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
 
             <Modal
                 isOpen={isModalOpen}

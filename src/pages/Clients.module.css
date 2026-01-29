@@ -60,7 +60,7 @@
     background-color: var(--surface-light);
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .table {
@@ -97,9 +97,25 @@
     color: var(--text-secondary);
     margin-top: 0.25rem;
     max-width: 300px;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Removed min-width to allow fitting */
+}
+
+/* Allow wrapping in table to avoid horizontal scroll */
+.table th,
+.table td {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 250px;
+    /* Limit max width of any single cell */
+}
+
+/* Actions column shouldn't wrap weirdly but needs space */
+.table td:last-child {
+    white-space: nowrap;
+    width: 1%;
+    /* Shrink to fit content */
 }
 
 .salesmanTag {
@@ -212,4 +228,40 @@
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pageBtn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background-color: var(--primary-gold);
+    color: #fff;
+    border-color: var(--primary-gold);
+}
+
+.pageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }

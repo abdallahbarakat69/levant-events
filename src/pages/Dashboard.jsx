@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Users, UserList, UserPlus, Clock } from 'phosphor-react';
 import { dataService } from '../services/dataService';
+import { authService } from '../services/authService';
+import RecentChanges from '../components/RecentChanges';
 import styles from './Dashboard.module.css';
 
 const StatCard = ({ title, value, icon: Icon, color, trend }) => (
@@ -20,17 +22,24 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => (
 
 const Dashboard = () => {
     const [stats, setStats] = useState({ clients: 0, salesmen: 0, recentClients: [] });
+    const [userRole, setUserRole] = useState('staff');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            const clients = await dataService.getClients();
-            const salesmen = await dataService.getSalesmen();
+            const [clientCount, salesmen, recentClients, role] = await Promise.all([
+                dataService.getClientCount(),
+                dataService.getSalesmen(),
+                dataService.getRecentClients(5),
+                authService.getCurrentUserRole()
+            ]);
+
             setStats({
-                clients: clients.length,
+                clients: clientCount,
                 salesmen: salesmen.length,
-                recentClients: clients.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 5)
+                recentClients: recentClients
             });
+            setUserRole(role);
             setLoading(false);
         };
         fetchData();
@@ -106,6 +115,12 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {userRole === 'admin' && (
+                <div className={styles.section} style={{ marginTop: '2rem' }}>
+                    <RecentChanges />
+                </div>
+            )}
         </div>
     );
 };

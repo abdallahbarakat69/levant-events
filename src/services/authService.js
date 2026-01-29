@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from '../supabaseClient.js';
 
 export const authService = {
     login: async (email, password) => {
@@ -8,7 +8,18 @@ export const authService = {
         });
         if (error) throw error;
 
-        // Improve: fetch role from 'profiles' table if needed
+        // Check if profile exists (Soft Delete Check)
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+        if (profileError || !profile) {
+            await supabase.auth.signOut();
+            throw new Error("Access Denied: User account has been removed.");
+        }
+
         return data.user;
     },
 
@@ -22,9 +33,38 @@ export const authService = {
         return user;
     },
 
+    getCurrentUserRole: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (error) return 'staff'; // Default to staff on error
+        return data ? data.role : 'staff';
+    },
+
     isAuthenticated: async () => {
         const { data: { session } } = await supabase.auth.getSession();
-        return !!session;
+        if (!session) return false;
+
+        // Double check if profile exists (in case user was deleted but session persists)
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', session.user.id)
+            .single();
+
+        if (error || !data) {
+            // Profile missing, force logout
+            await supabase.auth.signOut();
+            return false;
+        }
+
+        return true;
     },
 
     // User Management Methods

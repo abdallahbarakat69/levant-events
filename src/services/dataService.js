@@ -27,13 +27,58 @@ const mapClientToDB = (client) => ({
 export const dataService = {
     // Clients
     getClients: async () => {
+        let allClients = [];
+        let from = 0;
+        const step = 1000;
+        let more = true;
+
+        while (more) {
+            const { data, error } = await supabase
+                .from('clients')
+                .select('*')
+                .order('full_name', { ascending: true })
+                .range(from, from + step - 1);
+
+            if (error) {
+                console.error('Error fetching clients:', error);
+                return [];
+            }
+
+            if (data.length > 0) {
+                allClients = allClients.concat(data);
+                from += step;
+                if (data.length < step) {
+                    more = false; // Last page
+                }
+            } else {
+                more = false;
+            }
+        }
+
+        return allClients.map(mapClientFromDB);
+    },
+
+    getClientCount: async () => {
+        const { count, error } = await supabase
+            .from('clients')
+            .select('*', { count: 'exact', head: true });
+
+        if (error) {
+            console.error('Error counting clients:', error);
+            return 0;
+        }
+        return count;
+    },
+
+    getRecentClients: async (limit = 5) => {
         const { data, error } = await supabase
             .from('clients')
             .select('*')
-            .order('updated_at', { ascending: false });
+            .order('updated_at', { ascending: false })
+            .limit(limit);
 
         if (error) {
-            console.error('Error fetching clients:', error);
+            console.error('Error fetching recent clients:', error);
             return [];
         }
         return data.map(mapClientFromDB);
@@ -56,13 +101,14 @@ export const dataService = {
 
     updateClient: async (id, updates) => {
         const dbUpdates = {};
-        if (updates.fullName) dbUpdates.full_name = updates.fullName;
-        if (updates.phone) dbUpdates.phone = updates.phone;
-        if (updates.email) dbUpdates.email = updates.email;
-        if (updates.notes) dbUpdates.notes = updates.notes;
-        if (updates.salesmanId) dbUpdates.salesman_id = updates.salesmanId;
-        if (updates.socialMedia) dbUpdates.social_media = updates.socialMedia;
-        if (updates.website) dbUpdates.website = updates.website;
+        if (updates.fullName !== undefined) dbUpdates.full_name = updates.fullName;
+        if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+        if (updates.email !== undefined) dbUpdates.email = updates.email;
+        if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+        // Handle salesman_id: if empty string, set to null (or keep as is if your schema allows empty string FKs, but null is safer for 'unassigned')
+        if (updates.salesmanId !== undefined) dbUpdates.salesman_id = updates.salesmanId || null;
+        if (updates.socialMedia !== undefined) dbUpdates.social_media = updates.socialMedia;
+        if (updates.website !== undefined) dbUpdates.website = updates.website;
 
         const { data, error } = await supabase
             .from('clients')
