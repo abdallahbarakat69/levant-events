@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from './pages/Login';
 import MainLayout from './layouts/MainLayout';
 import { authService } from './services/authService';
@@ -51,7 +51,7 @@ const ProtectedRoute = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/levant-events">
       <Routes>
         <Route path="/login" element={<Login />} />
 
