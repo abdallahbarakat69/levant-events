@@ -29,18 +29,15 @@ const ProtectedRoute = () => {
         if (mounted) setIsAuthenticated(auth);
       } catch (err) {
         console.error("Auth check failed:", err);
-        if (mounted) setError(err.message);
-        // Fallback to false on error to redirect to login, or let user know
-        if (mounted) setIsAuthenticated(false);
+        if (mounted) {
+          setError(err.message);
+          setIsAuthenticated(false); // Force to login page
+        }
       }
     };
     checkAuth();
     return () => { mounted = false; };
   }, []);
-
-  if (error) {
-    return <div style={{ padding: 20, color: 'red' }}>Error checking auth: {error}. Check console.</div>;
-  }
 
   if (isAuthenticated === null) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#666' }}>Loading...</div>;
